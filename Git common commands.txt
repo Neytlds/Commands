@@ -1,18 +1,27 @@
 Git 常用命令
 
-1.创建存储库：
+0.切换路径
+	cd d:solution/git/
+	
+1.初始化Git
+	git config -global user.name "Kimi"
+	git config -gloabl user.email "kimi@Gmail.com"
+
+2.创建存储库：
 	git init
 
-2.把文件添加到仓库：
+3.把文件添加到仓库：
 	git add filename.txt
 
-3.将文件提交到仓库：
+4.将文件提交到仓库：
 	git commit -m "本次提交的说明文字"
 
-4.查看仓库的当前状态
+5.查看仓库的当前状态
 	git status
 	
-5.查看文件的修改情况，前提是 git status 命令提示文件被修改过
-	git diff filename.txt
+6.查看文件的修改情况，前提是 git status 命令提示文件被修改过。文件名区分大小写，文件名中的空格用“\ ”即可
+	git diff FileName.txt
+	git diff "File Name.txt"
+	git diff File\ Name.txt
 	
-6.
+7.
