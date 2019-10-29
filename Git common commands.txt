@@ -38,4 +38,23 @@ Git 常用命令
 10.查看工作区与版本库里面最新版本的区别
 	git diff HARD -- FileName.txt
 
+11.撤销文件在工作区的修改。这里有两种情况：
+	一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+	一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+	总之，就是让这个文件回到最近一次git commit或git add时的状态。
+	git checkout -- FileName.txt
+
+12.撤销暂存区的修改，重新放到工作区。HEAD表示最新的版本。如需继续撤销工作区的修改（使用第11节的命令）
+	git reset HARD FileName.txt
+
+13.如果提交了不合适的修改到版本库，想要撤回修改需要使用版本回退（使用第8节的命令），前提是没有推送到远程库
+
+14.从版本库中删除一个文件
+	git rm FileName.txt
+	git commit -m "Delete FileName.txt"
+
+15.恢复误删除的文件使用第11节的命令
+
+16.在用户主目录生成SSH Key秘钥文件（C:\Users\Administrator\.ssh）
+	ssh-keygen -t rsa -C "youremail@example.com"
 
