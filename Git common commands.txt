@@ -32,9 +32,10 @@ Git 常用命令
 	git reset --hard HEAD^
 	git reset --hard 1094a
 
-9.查看每次一命令。主要用于获取版本回退以后查不到的commit id，可用于版本回后取消
+9.查看命令历史。获取commit id，以便重返未来
 	git reflog
 
-
+10.查看工作区与版本库里面最新版本的区别
+	git diff HARD -- FileName.txt
 
 
