@@ -58,3 +58,13 @@ Git 常用命令
 16.在用户主目录生成SSH Key秘钥文件（C:\Users\Administrator\.ssh）
 	ssh-keygen -t rsa -C "youremail@example.com"
 
+17.将本地存储库与远程仓储关联，语法：git remote add origin git@server-name:path/repo-name.git
+	git remote add origin git@github.com:Neytlds/GitDemo.git
+
+	origin:远程库的名字，git的默认叫法
+	Neytlds:GitHub的账户名
+	GitDemo:GitHub上存储库的名称
+
+18.将本地库所有内容推送到远程库
+	git push -u origin master	第一次推送使用参数：-u。Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令
+	git push origin master		再次提交就可以不使用-u参数了
