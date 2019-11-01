@@ -68,3 +68,6 @@ Git 常用命令
 18.将本地库所有内容推送到远程库
 	git push -u origin master	第一次推送使用参数：-u。Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令
 	git push origin master		再次提交就可以不使用-u参数了
+
+19.从远程仓库克隆到本地
+	git clone git@github.com:Neytlds/GitDemo.git
