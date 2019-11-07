@@ -91,4 +91,4 @@ Git 常用命令
 	git merge dev		将dev分区合并到master分区
 
 25.删除dev分区
-	git branch -d dev
+	git branch -d dev	--feature1
