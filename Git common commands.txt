@@ -94,6 +94,7 @@ Git 常用命令
 	git branch -d dev
 
 26.查看分支合并图
+	git log --graph --pretty=oneline --abbrev-commit
 	git log --graph
 
 27.合并dev分支并禁用Fast Forward，将生成一个新的commit，所以使用-m参数保存提交信息。禁用Fast Forward合并分支将保留分支信息
