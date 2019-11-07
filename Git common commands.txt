@@ -71,3 +71,15 @@ Git 常用命令
 
 19.从远程仓库克隆到本地
 	git clone git@github.com:Neytlds/GitDemo.git
+
+20.创建名为dev的分支
+	git branch dev
+
+21.切换到dev分支
+	git checkout dev
+
+22.创建名为dev的分支，并切换到dev分支
+	git checkout -b dev
+
+23.查看当前分支
+	git branch
