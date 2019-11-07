@@ -76,10 +76,19 @@ Git 常用命令
 	git branch dev
 
 21.切换到dev分支
-	git checkout dev
+	git checkout dev	（旧的方式，不推荐使用）
+	git switch dev		（git推荐）
 
 22.创建名为dev的分支，并切换到dev分支
-	git checkout -b dev
+	git checkout -b dev		（旧的方式，不推荐使用）
+	git switch -c dev		（git推荐）
 
 23.查看当前分支
 	git branch
+
+24.合并给定分区到当前分区（将分区dev合并到master分区）
+	git branch master	切换到master分区（git不推荐）
+	git merge dev		将dev分区合并到master分区
+
+25.删除dev分区
+	git branch -d dev
