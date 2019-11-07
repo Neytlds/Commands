@@ -120,3 +120,21 @@ Git 常用命令
 
 32.复制一个特定的提交到当前分支
 	git cherry-pick 4c805e2
+
+33.查看远程库信息
+	git remote
+	git remote -v	显示详细信息
+
+34.推送分支到远程库
+	git push origin master
+	git push origin dev
+	git push origin feature1
+
+35.设置dev分支与远程库origin/dev分支的链接
+	git branch --set-upstream-to=origin/dev dev
+
+36.把最新提交从远程库origin/dev拉取下来
+	git pull
+
+37.将本地未推送到远程库的分支历史整理成直线，使得在阅读历史提交变化时更容易
+	git rebase
