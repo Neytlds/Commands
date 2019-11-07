@@ -90,8 +90,11 @@ Git 常用命令
 	git branch master	切换到master分区（git不推荐）
 	git merge dev		将dev分区合并到master分区
 
-25.删除dev分区
+25.删除dev分区anch
 	git branch -d dev
+
+   强制删除一个没有被合并过的分区
+	git branch -D dev
 
 26.查看分支合并图
 	git log --graph --pretty=oneline --abbrev-commit
@@ -99,3 +102,21 @@ Git 常用命令
 
 27.合并dev分支并禁用Fast Forward，将生成一个新的commit，所以使用-m参数保存提交信息。禁用Fast Forward合并分支将保留分支信息
 	git merge --no-ff -m "merge with No Fast Forward" dev
+
+28.将工作区未提交的修改进行临时存储，以便跳转到其它分支修复bug
+	git stash
+
+29.查看临时存储的列表
+	git stash list
+
+30.将临时存储区的工作恢复，并删除临时存储
+	git stash pop		将临时存储区的工作恢复，并删除临时存储
+	或者
+	git stash apply		恢复临时存储的工作内容
+	git stash drop		删除临时存储
+
+31.可以多次stash，回复的时候先用 git stash list 查看，然后恢复到指定stash
+	git stash apply statsh@{0}
+
+32.复制一个特定的提交到当前分支
+	git cherry-pick 4c805e2
