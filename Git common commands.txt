@@ -92,3 +92,6 @@ Git 常用命令
 
 25.删除dev分区
 	git branch -d dev
+
+26.查看分支合并图
+	git log --graph
