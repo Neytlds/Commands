@@ -138,3 +138,25 @@ Git 常用命令
 
 37.将本地未推送到远程库的分支历史整理成直线，使得在阅读历史提交变化时更容易
 	git rebase
+
+38.创建标签
+	git tag v1.0											在当前提交上创建标签，标签名称是“v1.0”
+	git tag v0.9 f52c633									在提交f52c633上创建标签，标签名称是“v0.9”
+	git tag -a v0.1 -m "version 0.1 released" f52c633		在提交f52c633上创建标签，标签名称是“v0.1”，标签的说明文字是“version 2.0 released”
+
+39.查看所有标签（注意：标签是按字母顺序列出的）
+	git tag
+
+40.查看标签信息（注意：标签总是和某个commit挂钩。如果这个commit既出现在master分支，又出现在dev分支，那么在这两个分支上都可以看到这个标签）
+	git show v0.9		显示标签“v0,9”的信息
+
+41.删除本地的标签
+	git tag -d v1.0
+
+42.将标签推送到远程库（标签存储在本地，不会自动推送到远程库）
+	git push origin v1.0		将名称是“v1.0”的标签推送到远程库
+	git push origin -tags		将所有本地标签推送到远程库
+
+43.删除已经推送到远程库的标签
+	git tag -d v0.9						先删除本地库的标签
+	git push origin :refs/tags/v0.9		再删除远程库的标签
