@@ -155,7 +155,7 @@ Git 常用命令
 
 42.将标签推送到远程库（标签存储在本地，不会自动推送到远程库）
 	git push origin v1.0		将名称是“v1.0”的标签推送到远程库
-	git push origin -tags		将所有本地标签推送到远程库
+	git push origin --tags		将所有本地标签推送到远程库
 
 43.删除已经推送到远程库的标签
 	git tag -d v0.9						先删除本地库的标签
