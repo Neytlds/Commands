@@ -160,3 +160,6 @@ Git 常用命令
 43.删除已经推送到远程库的标签
 	git tag -d v0.9						先删除本地库的标签
 	git push origin :refs/tags/v0.9		再删除远程库的标签
+
+44.让git的显示颜色
+	git config --global color.ui true
