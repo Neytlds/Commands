@@ -5,13 +5,14 @@ Git 常用命令
 	
 1.初始化Git
 	git config --global user.name "Kimi"
-	git config --gloabl user.email "kimi@Gmail.com"
+	git config --global user.email "kimi@Gmail.com"
 
 2.创建存储库
 	git init
 
 3.把文件添加到仓库
 	git add filename.txt
+	git add -f filename.txt		强制将.gitignore文件中忽略的文件添加到暂存区
 
 4.将文件提交到仓库
 	git commit -m "本次提交的说明文字"
@@ -163,3 +164,13 @@ Git 常用命令
 
 44.让git的显示颜色
 	git config --global color.ui true
+
+45.检查.gitignore文件是否存在错误
+	git check-ignore
+
+46.配置别名
+	git config --global alias.st status			将status关键字设置为缩写st，调用命令“git status”时可以简写为“git st”
+	git config --global alias.co checkout		将checkout关键字设置为缩写co，调用命令“git checkout”时可以简写为“git co”
+	git config --global alisa.ci commit			将commit关键字设置为缩写ci，调用命令“git commit”时可以简写为“git ci”
+	git config --gloabl alisa.br branch			将branch关键字设置为缩写br，调用命令“git branch”时可以简写为“git br”
+	git config --gloabl alisa.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
