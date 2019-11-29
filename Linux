@@ -1,4 +1,4 @@
-docker exec -it /bin/bash
+docker exec -it 6c3805 /bin/bash
 apt-get update
 apt install git
 y
