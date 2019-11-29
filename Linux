@@ -1,4 +1,4 @@
-Docker exec -it /bin/bash
-Apt-get update
-Apt install git
+docker exec -it /bin/bash
+apt-get update
+apt install git
 y
