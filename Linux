@@ -1,0 +1,4 @@
+Docker exec -it /bin/bash
+Apt-get update
+Apt install git
+y
