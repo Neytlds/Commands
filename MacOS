@@ -1,6 +1,8 @@
-1、获取root权限
+MacOS 常用命令
+
+1. 获取root权限
   su root
  
- 2、修改root密码
+2. 修改root密码
   sudo passwd root
  
