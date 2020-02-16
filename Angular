@@ -1,0 +1,18 @@
+Angular 常用命令
+
+1.安装Angular CLI
+  npm install -g @angular/cli
+
+2.新建Angular工程
+  ng new my-app-name
+
+3.运行Angular应用
+  cd my-app-name
+  ng serve --open
+
+4.新建组件
+  ng generate component my-component-name
+
+5.新建服务
+  ng generate service my-service-name
+
