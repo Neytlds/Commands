@@ -11,6 +11,7 @@ Git 常用命令
 	git init
 
 3.把文件添加到仓库
+	git add .			将所有文件添加到暂存区
 	git add filename.txt
 	git add -f filename.txt		强制将.gitignore文件中忽略的文件添加到暂存区
 
