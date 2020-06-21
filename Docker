@@ -1,0 +1,25 @@
+Docker 常用命令
+
+1.查看 docker 的版本
+	docker version
+    docker --version    -- docker 软件的版本
+
+2.查看 docker 的信息
+    docker info
+
+3.执行名为 hello-world 的 docker 镜像，如果本地没有这个镜像，则从 Docker Hub 上下载
+    docker run hello-world
+
+4.查看正在运行的容器
+    docker ps
+
+5.查看所有容器
+    docker ps -a
+
+6.查看镜像列表
+    docker image ls
+
+7.查看容器列表
+    docker container ls
+    docker container ls --all
+    docker container ls -aq
