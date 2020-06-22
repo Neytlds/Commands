@@ -2,13 +2,14 @@ Docker 常用命令
 
 1.查看 docker 的版本
 	docker version
-    docker --version    -- docker 软件的版本
+    docker --version    // docker 软件的版本
 
 2.查看 docker 的信息
     docker info
 
-3.执行名为 hello-world 的 docker 镜像，如果本地没有这个镜像，则从 Docker Hub 上下载
-    docker run hello-world
+3.查看镜像列表。image：镜像，类似ISO。
+    docker images
+    docker images ls
 
 4.查看正在运行的容器
     docker ps
@@ -16,10 +17,50 @@ Docker 常用命令
 5.查看所有容器
     docker ps -a
 
-6.查看镜像列表
-    docker image ls
-
-7.查看容器列表
+6.查看容器列表
     docker container ls
     docker container ls --all
     docker container ls -aq
+
+7.从 Docker Hub 上拉取镜像到本地
+    docker pull mongo           // 拉取 mongo db 最新版的镜像到本地
+    docker pull mongo:3.6.18    // 拉取 mongo db 的 3.6.18 版本的镜像到本地
+
+8.删除镜像
+    docker rmi 7a               // 使用 IMAGE ID 删除镜像。注意：当没有重复的情况下，可以简写
+    docker rmi mongo            // 使用 REPOSITORY（镜像名称） 删除镜像。注意：这里必须使用全称
+    docker rmi mongo:3.6.18     // 使用 REPOSITORY + TAG（版本号） 删除镜像
+
+9.运行名为 hello-world 的 docker 镜像，如果本地没有这个镜像，则从 Docker Hub 上下载后运行
+    docker run hello-world
+    docker run -it --rm -p 8000:80 --name aspnetcore_sample mcr.microsoft.com/dotnet/core/samples:aspnetapp
+
+    docker run 参数说明：
+        -it                                                 容器运行后自动进入容器的 bash 进行交互
+        -d                                                  分离模式，使容器运行在后台（与 -it 应该不能同时执行）
+        --rm                                                容器运行后自动删除这个容器
+        -p 8000:80                                          映射端口：在外部通过8000端口访问容器内的80端口
+        --name aspnetcore_sample                            设置启动容器的名称为：aspnetcore_sample
+        mcr.microsoft.com.dotnet/core/samples:aspnetapp     运行的镜像名称
+
+10.运行一个容器
+    docker start hello-world        // 通过 名称 运行容器
+    docker start 87                 // 通过 ID 运行容器
+
+11.停止运行容器。注意：停止后，容器中的数据和状态保持不变
+    docker stop hello-world         // 通过 名称 停止容器
+    docker stop 87                  // 通过 ID 停止容器
+    docker stop 87 26 d4            // 停止 ID 为 87、26 和 d4 的容器
+    docker stop $(docker ps -aq)    // 停止所有运行的容器(在 cmd 中无法使用这个命令)，-a：返回所有容器；q：只返回容器的ID；$(docker ps -aq)：返回所有容器 ID 的列表
+    ctrl + c                        // 快捷键：停止容器中的应用，同时停止运行的容器
+    ctrl + p, ctrl + q              // 停止容器中的应用，同时保持容器的运行（先按快捷键 crtl + p，再按快捷键 ctrl + q）
+
+12.删除停止的容器
+    docker rm hello-world
+
+13.进入正在运行容器的 bash 与之交互
+    docker exec -it 87 /bin/bash
+
+14.退出容器的 bash
+    exec                                    在 Windows 系统中退出 bash 模式
+    ctrl + p + q
