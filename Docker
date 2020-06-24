@@ -64,3 +64,61 @@ Docker 常用命令
 14.退出容器的 bash
     exec                                    在 Windows 系统中退出 bash 模式
     ctrl + p + q
+
+
+Swarm 操作（集群操作）：
+
+15.建立虚拟机（Linux版）
+    sudo docker swarm init --advertise-addr 192.168.1.100:2377 --listen-addr 192.168.1.100:2377
+    
+    docker swarm init 参数说明：
+        sudo                                                在 Linux 中启用管理员权限运行命令
+        --advertise-addr 192.168.1.100:2377                 无论服务器中有多少个 IP 地址，始终使用 192.168.1.100:2377 作为 docker swarm 相关应用
+        --listen-addr 192.168.1.100:2377                    需要监听的 IP 地址
+    注：IP 地址最好使用内网 IP 地址
+
+16.建立 service
+    docker service create --name ServiceName -p 8000:80 -replicas 5 microsoft/dotnet-samples:aspnetapp
+    docker service create --name ServiceName --network NetWorkName -p 8000:80 -replicas 5 datagridsys/sample-vote:1.0
+
+    参数说明：
+        -replicas 5                                         运行 5 个复制容器
+        --network NetWorkName                               overlay network 名称
+
+17.扩展 service 的节点数量到 10 个
+    docker service update --replicas 10 microsoft/dotnet-samples:aspnetapp
+    docker service scale ServiceName=10
+
+18.删除 service
+    docker service rm ServiceName
+
+19.查看运行中的 service 列表
+    docker service ls
+
+20.查看运行的所有 service 的详细列表
+    docker service ps ServiceName
+    docker service ps ServiceName ｜ grep :2.0
+
+    参数说明：
+        ServiceName                                          必填，运行 service 的名称
+        grep :2.0                                            只查看 2.0 版本的镜像
+
+21.查看 service 的详细信息
+    docker service inspect ServiceName
+
+    参数说明：
+        ServiceName                                          必填，运行 service 的名称
+
+22.更新 service
+    docker service update --image datagridsys/sample-vote:2.0 --update-parallelism 2 --update-delay 10s ServiceName
+
+    参数说明：
+        --image datagridsys/sample-vote:2.0                     镜像更新的名称和版本
+        --update-parallelism 2                                  每次更新 service 的数量
+        --update-delay 10s                                      更新的间隔
+
+22.建立 overlay network
+    docker network create -d overlay my-net                 my-net：名称
+
+23.查看建立的 overlay network
+    docker network ls
