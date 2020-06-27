@@ -33,21 +33,34 @@ Docker 常用命令
 
 9.运行名为 hello-world 的 docker 镜像，如果本地没有这个镜像，则从 Docker Hub 上下载后运行
     docker run hello-world
-    docker run -it --rm -p 8000:80 --name aspnetcore_sample mcr.microsoft.com/dotnet/core/samples:aspnetapp
+    docker run -it --rm -p 8000:80 -v /data/app --name aspnetcore_sample mcr.microsoft.com/dotnet/core/samples:aspnetapp
+    docker run -it --rm -p 8000:80 -v ${PWD}:/data/app --workdir "/data/app" -v /host_mnt/d/projects/docker/myvol:/data/app --name aspnetcore_sample mcr.microsoft.com/dotnet/core/samples:aspnetapp
 
     docker run 参数说明：
         -it                                                 容器运行后自动进入容器的 bash 进行交互
         -d                                                  分离模式，使容器运行在后台（与 -it 应该不能同时执行）
         --rm                                                容器运行后自动删除这个容器
         -p 8000:80                                          映射端口：在外部通过8000端口访问容器内的80端口
+        -v /data/app                                        创建卷（Volume），容器中的路径为 /data/app
+        -v ${PWD}:/data/app                                 创建卷（Volume），容器中的路径为 /data/app，容器外（安装 docker 的 Linux 系统或虚拟机）对应的路径为${PWD}
+        ${PWD}                                              Windows 系统获取命令提示符当前所在的路径
+        --workdir "/data/app"                               工作目录所在的路径，可以理解为源代码所在的目录
+        -v /host_mnt/d/projects/docker/myvol:/data/app      创建了第二个卷（Volume），将程序的输入放到数组系统中，如容器中的程序在卷（Volume）中创建了文件
         --name aspnetcore_sample                            设置启动容器的名称为：aspnetcore_sample
         mcr.microsoft.com.dotnet/core/samples:aspnetapp     运行的镜像名称
 
-10.运行一个容器
+10.查看卷（Volume）的定义
+    docker inspect ef9                          // ef9 为容器的 ID
+
+    执行结果说明：
+        Mounts.Source                                       docker 中世纪存储卷（Volume）的位置
+        Mounts.Destination                                  用户设置的容器内容的卷的路径
+
+11.运行一个容器
     docker start hello-world        // 通过 名称 运行容器
     docker start 87                 // 通过 ID 运行容器
 
-11.停止运行容器。注意：停止后，容器中的数据和状态保持不变
+12.停止运行容器。注意：停止后，容器中的数据和状态保持不变
     docker stop hello-world         // 通过 名称 停止容器
     docker stop 87                  // 通过 ID 停止容器
     docker stop 87 26 d4            // 停止 ID 为 87、26 和 d4 的容器
@@ -55,20 +68,20 @@ Docker 常用命令
     ctrl + c                        // 快捷键：停止容器中的应用，同时停止运行的容器
     ctrl + p, ctrl + q              // 停止容器中的应用，同时保持容器的运行（先按快捷键 crtl + p，再按快捷键 ctrl + q）
 
-12.删除停止的容器
+13.删除停止的容器
     docker rm hello-world
 
-13.进入正在运行容器的 bash 与之交互
+14.进入正在运行容器的 bash 与之交互
     docker exec -it 87 /bin/bash
 
-14.退出容器的 bash
+15.退出容器的 bash
     exec                                    在 Windows 系统中退出 bash 模式
     ctrl + p + q
 
 
 Swarm 操作（集群操作）：
 
-15.建立一个管理节点虚拟机（Linux版）
+16.建立一个管理节点虚拟机（Linux版）
     sudo docker swarm init --advertise-addr 192.168.1.100:2377 --listen-addr 192.168.1.100:2377
     
     docker swarm init 参数说明：
@@ -77,16 +90,16 @@ Swarm 操作（集群操作）：
         --listen-addr 192.168.1.100:2377                    需要监听的 IP 地址
     注：IP 地址最好使用内网 IP 地址
 
-16.获取要加入本机管理节点的 docker 命令和 Token
+17.获取要加入本机管理节点的 docker 命令和 Token
     docker swarm join-token manager
 
-17.获取要加入本机工人节点的 docker 命令和 Token
+18.获取要加入本机工人节点的 docker 命令和 Token
     docker swarm join-token worker
 
-18.使用以下命令可以查看本机的 swarm 状态
+19.使用以下命令可以查看本机的 swarm 状态
     docker info
 
-19.将本机算计加入作为管理节点或工人节点加入到 swarm
+20.将本机算计加入作为管理节点或工人节点加入到 swarm
     docker swarm join --token SWMKIT-1-33fc8cufhj3cadr...5a7sq 10.0.0.4:2377 --advertise-addr 192.168.1.101:2377 --listen-addr 192.168.1.101:2377
 
     参数说明：
@@ -95,22 +108,22 @@ Swarm 操作（集群操作）：
         --advertise-addr 192.168.1.101:2377                 （本地机）无论服务器中有多少个 IP 地址，始终使用 192.168.1.100:2377 作为 docker swarm 相关应用
         --listen-addr 192.168.1.101:2377                    （本地机）需要监听的 IP 地址
 
-20.查看 swarm 节点信息。注意：只能在 manager 节点运行此命令，worker 节点没有权限运行该命令
+21.查看 swarm 节点信息。注意：只能在 manager 节点运行此命令，worker 节点没有权限运行该命令
     docker node ls
 
-21.将工人节点升级为管理节点。注：只能在管理节点的计算机上运行此命令
+22.将工人节点升级为管理节点。注：只能在管理节点的计算机上运行此命令
     docker node promote hv7jm4gwnkh...865y
 
     参数说明：
         hv7jm4gwnkh...865y                                  运行 docker node ls 找到的，要提升为管理节点的工人节点 ID
 
-22.从 swarm 节点退出
+23.从 swarm 节点退出
     docker swarm leave --force
 
 
 Service 操作：
  
-23.建立 service
+24.建立 service
     docker service create --name ServiceName -p 8000:80 -replicas 5 microsoft/dotnet-samples:aspnetapp
     docker service create --name ServiceName --network NetWorkName -p 8000:80 -replicas 5 datagridsys/sample-vote:1.0
 
@@ -118,17 +131,17 @@ Service 操作：
         -replicas 5                                         运行 5 个复制容器
         --network NetWorkName                               overlay network 名称
 
-24.扩展 service 的节点数量到 10 个
+25.扩展 service 的节点数量到 10 个
     docker service update --replicas 10 microsoft/dotnet-samples:aspnetapp
     docker service scale ServiceName=10
 
-25.删除 service
+26.删除 service
     docker service rm ServiceName
 
-26.查看运行中的 service 列表
+27.查看运行中的 service 列表
     docker service ls
 
-27.查看运行的所有 service 的详细列表
+28.查看运行的所有 service 的详细列表
     docker service ps ServiceName
     docker service ps ServiceName ｜ grep :2.0
 
@@ -136,13 +149,13 @@ Service 操作：
         ServiceName                                          必填，运行 service 的名称
         grep :2.0                                            只查看 2.0 版本的镜像
 
-28.查看 service 的详细信息
+29.查看 service 的详细信息
     docker service inspect ServiceName
 
     参数说明：
         ServiceName                                          必填，运行 service 的名称
 
-29.更新 service
+30.更新 service
     docker service update --image datagridsys/sample-vote:2.0 --update-parallelism 2 --update-delay 10s ServiceName
 
     参数说明：
@@ -150,32 +163,32 @@ Service 操作：
         --update-parallelism 2                                  每次更新 service 的数量
         --update-delay 10s                                      更新的间隔
 
-30.建立 overlay network
+31.建立 overlay network
     docker network create -d overlay my-net                 my-net：名称
 
-31.查看建立的 overlay network
+32.查看建立的 overlay network
     docker network ls
 
 
 STACK 操作
 
-32.建立 yml 文件
+33.建立 yml 文件
     mkdir mystack                                           建立一个名为 mystack 的文件夹
     cd mystack                                              进入这个文件夹
     vim docker-compose.yml                                  建立文件 docker-compose.yml
     之后在文件中♏️ stack 的基本配置并保存
 
-33.部署 stack
+34.部署 stack
     docker stack deploy -c docker-compose.yml StackName
 
-34.查看 stack 的详细信息
+35.查看 stack 的详细信息
     docker stack ls
 
-35.查看指定 stack 中的 service 信息
+36.查看指定 stack 中的 service 信息
     docker stack services StackName
 
-36.查看指定 stack 中的镜像？信息
+37.查看指定 stack 中的镜像？信息
     docker stack ps StackName
 
-37.访问服务器中的 8080 端口可以以视图洁面查看
+38.访问服务器中的 8080 端口可以以视图洁面查看
     如浏览器访问：http://192.168.1.100:8080
