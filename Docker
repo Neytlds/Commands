@@ -68,7 +68,7 @@ Docker 常用命令
 
 Swarm 操作（集群操作）：
 
-15.建立虚拟机（Linux版）
+15.建立一个管理节点虚拟机（Linux版）
     sudo docker swarm init --advertise-addr 192.168.1.100:2377 --listen-addr 192.168.1.100:2377
     
     docker swarm init 参数说明：
@@ -77,7 +77,40 @@ Swarm 操作（集群操作）：
         --listen-addr 192.168.1.100:2377                    需要监听的 IP 地址
     注：IP 地址最好使用内网 IP 地址
 
-16.建立 service
+16.获取要加入本机管理节点的 docker 命令和 Token
+    docker swarm join-token manager
+
+17.获取要加入本机工人节点的 docker 命令和 Token
+    docker swarm join-token worker
+
+18.使用以下命令可以查看本机的 swarm 状态
+    docker info
+
+19.将本机算计加入作为管理节点或工人节点加入到 swarm
+    docker swarm join --token SWMKIT-1-33fc8cufhj3cadr...5a7sq 10.0.0.4:2377 --advertise-addr 192.168.1.101:2377 --listen-addr 192.168.1.101:2377
+
+    参数说明：
+        --token SWMKIT-1-33fc8cufhj3cadr...5a7sq            token 的值，直接复制 docker swarm join-token manager 命令的结果即可
+        10.0.0.4:2377                                       要加入 swarm 节点主机的 IP 和端口，直接复制 docker swarm join-token manager 命令的结果即可
+        --advertise-addr 192.168.1.101:2377                 （本地机）无论服务器中有多少个 IP 地址，始终使用 192.168.1.100:2377 作为 docker swarm 相关应用
+        --listen-addr 192.168.1.101:2377                    （本地机）需要监听的 IP 地址
+
+20.查看 swarm 节点信息。注意：只能在 manager 节点运行此命令，worker 节点没有权限运行该命令
+    docker node ls
+
+21.将工人节点升级为管理节点。注：只能在管理节点的计算机上运行此命令
+    docker node promote hv7jm4gwnkh...865y
+
+    参数说明：
+        hv7jm4gwnkh...865y                                  运行 docker node ls 找到的，要提升为管理节点的工人节点 ID
+
+22.从 swarm 节点退出
+    docker swarm leave --force
+
+
+Service 操作：
+ 
+23.建立 service
     docker service create --name ServiceName -p 8000:80 -replicas 5 microsoft/dotnet-samples:aspnetapp
     docker service create --name ServiceName --network NetWorkName -p 8000:80 -replicas 5 datagridsys/sample-vote:1.0
 
@@ -85,17 +118,17 @@ Swarm 操作（集群操作）：
         -replicas 5                                         运行 5 个复制容器
         --network NetWorkName                               overlay network 名称
 
-17.扩展 service 的节点数量到 10 个
+24.扩展 service 的节点数量到 10 个
     docker service update --replicas 10 microsoft/dotnet-samples:aspnetapp
     docker service scale ServiceName=10
 
-18.删除 service
+25.删除 service
     docker service rm ServiceName
 
-19.查看运行中的 service 列表
+26.查看运行中的 service 列表
     docker service ls
 
-20.查看运行的所有 service 的详细列表
+27.查看运行的所有 service 的详细列表
     docker service ps ServiceName
     docker service ps ServiceName ｜ grep :2.0
 
@@ -103,13 +136,13 @@ Swarm 操作（集群操作）：
         ServiceName                                          必填，运行 service 的名称
         grep :2.0                                            只查看 2.0 版本的镜像
 
-21.查看 service 的详细信息
+28.查看 service 的详细信息
     docker service inspect ServiceName
 
     参数说明：
         ServiceName                                          必填，运行 service 的名称
 
-22.更新 service
+29.更新 service
     docker service update --image datagridsys/sample-vote:2.0 --update-parallelism 2 --update-delay 10s ServiceName
 
     参数说明：
@@ -117,8 +150,32 @@ Swarm 操作（集群操作）：
         --update-parallelism 2                                  每次更新 service 的数量
         --update-delay 10s                                      更新的间隔
 
-22.建立 overlay network
+30.建立 overlay network
     docker network create -d overlay my-net                 my-net：名称
 
-23.查看建立的 overlay network
+31.查看建立的 overlay network
     docker network ls
+
+
+STACK 操作
+
+32.建立 yml 文件
+    mkdir mystack                                           建立一个名为 mystack 的文件夹
+    cd mystack                                              进入这个文件夹
+    vim docker-compose.yml                                  建立文件 docker-compose.yml
+    之后在文件中♏️ stack 的基本配置并保存
+
+33.部署 stack
+    docker stack deploy -c docker-compose.yml StackName
+
+34.查看 stack 的详细信息
+    docker stack ls
+
+35.查看指定 stack 中的 service 信息
+    docker stack services StackName
+
+36.查看指定 stack 中的镜像？信息
+    docker stack ps StackName
+
+37.访问服务器中的 8080 端口可以以视图洁面查看
+    如浏览器访问：http://192.168.1.100:8080
