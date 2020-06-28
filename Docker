@@ -192,3 +192,48 @@ STACK 操作
 
 38.访问服务器中的 8080 端口可以以视图洁面查看
     如浏览器访问：http://192.168.1.100:8080
+
+
+定制镜像：
+
+39.基于 VS Code 创建的镜像
+    1.在 VS Code 中创建 .Net Core 网站
+    2.安装 Docker 插件，作者：Microsoft
+    3.创建 dockerfile 文件：
+        在 VS Code 中按 Ctrl + Shift + P
+        输入 docker ，查找并选择 Add Docker Files to Workspace
+        选择应用平台，这里为 ASP.Net Core
+        选择容器类型，Windows 10 中只能运行 Linux 平台的容器，所以选择 Linux
+        程序暴露的端口输入：5000
+        回车后将创建出 Dockerfile 文件                                         // 自动创建的 dockerfile 文件可能会有问题，可能需要改一些内容
+    4.在项目目录下使用命令：
+        docker build -t JianHe/MyAspNetCoreWeb .                        // 最后的点是指当前目录，JianHe/MyAspNetCoreWeb 是镜像的名称
+    5.运行刚建好的镜像：
+        docker run -d -p 8080:5000 -v ${PWD}:/app JianHe/MyAspNetCoreWeb
+    6.如果运行不起来可以使用下面的命令查看日志：
+        docker log -f 6c6c                                              // 6c6c 为 ID
+    
+    正确的 Dockerfile 文件内容：
+
+        FROM microsoft/dotnet:2.1-sdk AS build-env
+        WORKDIR /app
+
+        # Copy csproj and restore as distinct layers
+        COPY *.csproj ./
+        RUN dotnet restore
+
+        # Copy everything else and build
+        COPY . ./
+        RUN dotnet publish -c Release -o out
+
+        # Build runtime image
+        FROM microsoft/dotnet:2.1-aspnetcore-runtime
+        WORKDIR /app
+        COPY --from=build-env /app/out .
+        ENTRYPOINT  ["dotnet","temp.dll"]
+
+40.将自定义镜像发布到 Docker Hub 上
+    1.登录到 Docker
+        docker login
+    2.将本地镜像推送到 Docker Hub 上
+        docker push 用户名/镜像名
