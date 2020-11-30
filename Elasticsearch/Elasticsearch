@@ -1,0 +1,77 @@
+1.安装或启动 Elasticsearch
+    bin/elasticsearch
+    bin/elasticsearch -E node.name=node0 -E cluster.name=geektime -E path.data=node0_data
+
+2.访问 Elasticsearch
+    GET http://localhost:9200
+
+3.查看 Elasticsearch 插件
+    bin/elasticsearch-plugin list
+
+4.安装 Elasticsearch 插件
+    bin/elasticsearch-plugin install analysis-icu
+
+    说明：
+        analysis-icu    要安装的插件名称（analysis-icu 是一个国际化的分词插件）
+
+5.访问 Elasticsearch 插件
+    GET http://localhost:9200/_cat/plugins
+
+6.在本机运行多个 Elasticsearch 的实例
+    bin/elasticsearch -E node.name=node0 -E cluster.name=geektime -E path.data=node0_data
+    bin/elasticsearch -E node.name=node1 -E cluster.name=geektime -E path.data=node1_data
+    bin/elasticsearch -E node.name=node2 -E cluster.name=geektime -E path.data=node2_data
+    bin/elasticsearch -E node.name=node3 -E cluster.name=geektime -E path.data=node3_data
+
+    说明：
+        node.name       节点名称
+        cluster.name    一个相同的集群名称
+        path.data       为每个节点设置不同的存放数据的地址
+
+7.查看 Elasticsearch 集群
+    GET http://localhost:9200/_cat/nodes
+    GET http://localhost:9200/_cluster/health
+
+8.启动 Kibana，启动前需要打开 Elasticsearch
+    bin/kibana
+
+9.访问 Kibana
+    GET http://localhost:5601/
+
+10.安装 Kibana 插件
+    bin/kibana-plugin install plugin_location
+
+11.查看 Kibana 插件
+    bin/kibana-plugin list
+
+12.删除 Kibana ？？？
+    bin/Kibana remove
+
+13.在 docker 容器中运行 elasticsearch
+    #启动 docker compose 文件，按照 yml 文件中的配置运行 docker，启动 es
+    docker-compose up
+
+    #停止容器
+    docker-compose down
+
+    #停止容器并且移除数据
+    docker-compose down -v
+
+    #一些docker 命令
+    docker ps
+    docker stop Name/ContainerId
+    docker start Name/ContainerId
+
+    #删除单个容器
+    $docker rm Name/ID
+    -f, –force=false; -l, –link=false Remove the specified link and not the underlying container; -v, –volumes=false Remove the volumes associated to the container
+
+    #删除所有容器
+    $docker rm `docker ps -a -q`  
+    停止、启动、杀死、重启一个容器
+    $docker stop Name/ID  
+    $docker start Name/ID  
+    $docker kill Name/ID  
+    $docker restart name/ID
+
+14.
