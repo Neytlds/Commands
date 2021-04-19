@@ -26,17 +26,17 @@ ClassMethod SendPost()
 	Set sc = httprequest.Post("https://test-my.ufh.com.cn/api/ehis/openapi/prescription/getPrescriptionList", 0)
 
     // 如果上面的 Post 方法发送失败，打印错误消息
-    If $$$ISERR(sc){
+    If $$$ISERR(sc) {
         Write $SYSTEM.Status.GetErrorText(sc)
     }
 	
 	Set response = httprequest.HttpResponse
 	
-	Set json =""
+	Set json = ""
 	If $ISOBJECT(response.Data) {
 		Set objStream = response.Data
 		
-		Set json =""
+		Set json = ""
 		While ('objStream.AtEnd) {
 		   	Set json = json _ objStream.ReadLine()
 		}

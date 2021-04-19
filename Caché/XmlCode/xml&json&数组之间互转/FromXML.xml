@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2016.2 (Build 736U)" ts="2021-04-19 10:00:28">
+<Class name="DHCDoc.Util.FromXML">
+<Description>
+名称: DHCDoc.Util.FromXML (来源：DHCDoc.Util.FromJSON)
+描述: xml、json、数组间的互转(支持cache2010)
+编写者：lixu
+编写日期: 2020-11-07
+测试列子：w ##class(DHCDoc.Util.FromXML).TestJsonXML()</Description>
+<IncludeCode>%callout,%occSAX,%occXSLT,%syNLS</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeChanged>65825,43016.409527</TimeChanged>
+<TimeCreated>65799,62202.599752</TimeCreated>
+
+<Parameter name="JsonChars">
+<Description>
+特殊符号</Description>
+<Default>{[:,]}</Default>
+</Parameter>
+
+<Property name="Data">
+<Type>%String</Type>
+<MultiDimensional>1</MultiDimensional>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="Row">
+<Description>
+行计数器</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Col">
+<Description>
+列计数器</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Char">
+<Description>
+当前字符</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="CharS">
+<Description>
+引号标识“"”</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="SubStr">
+<Description>
+子字符串</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="AtEnd">
+<Description>
+是否结束</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Parameter name="EscapeChar">
+<Type>COSEXPRESSION</Type>
+<Default>$LB($LB("\","\\"),$LB($C(13),"\n"),$LB($C(10),"\r"),$LB($C(9),"\t"),$LB("""","\"""),$LB($C(8),"\b"),$LB($C(12),"\f"))</Default>
+</Parameter>
+
+<Method name="SetData">
+<Description>
+加载JSON数据</Description>
+<FormalSpec>inputJson</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set $this.Row=0
+	Set $this.Col=0
+	Set $this.AtEnd=0
+	Kill i%Data
+	
+	Set Count=0
+	If $IsObject(inputJson) {
+		//输入参数->JSON数据流
+		try {
+			Do inputJson.Rewind()
+			While ('inputJson.AtEnd) {
+				Set tmpStr=inputJson.ReadLine(10000)     //Readline()
+				Continue:tmpStr=""
+				Set Count=Count+1
+				Set i%Data(Count)=tmpStr
+			}
+		} catch {}
+	} Else {
+		//输入参数->JSON字符串
+		Set Count=Count+1
+		Set i%Data(Count)=inputJson
+	}
+	Quit Count
+]]></Implementation>
+</Method>
+
+<Method name="GetData">
+<Description>
+解析JSON数据为数组</Description>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	Set json=##Class(%ArrayOfDataTypes).%New()
+	Do ..Next()
+    If ($this.Char="{"){
+	    Set json=..getJSONObject()
+	} ElseIf ($this.Char = "[") {
+		Set json=..getJSONArray()
+	} Else {
+		//Json格式错误
+	}
+	Quit json
+]]></Implementation>
+</Method>
+
+<Method name="Next">
+<Description>
+移动流数据指针位置</Description>
+<Implementation><![CDATA[
+	Set $this.Char=""
+	Set $this.CharS=""
+	Set $this.SubStr=""
+	If $g(i%Data($this.Row))="" {
+		Set $this.Row=$o(i%Data($this.Row))
+		Set:$this.Row="" $this.AtEnd=1  //表示结束
+		Set $this.Col=0
+	}
+	Quit:$this.AtEnd //退出
+	
+	Set iData=$g(i%Data($this.Row))
+	While '$this.AtEnd {
+		Set $this.Col=$this.Col+1
+		If $this.Col>$l(iData) {
+			Set $this.Row=$o(i%Data($this.Row))
+			Set:$this.Row="" $this.AtEnd=1  //表示结束
+			Set $this.Col=1
+			Set iData=$g(i%Data($this.Row))
+		}
+		Quit:$this.AtEnd //退出
+		Set $this.Char=$e(iData,$this.Col,$this.Col)
+		Continue:$this.Char=""
+		Continue:($this.CharS'="""")&($this.Char=" ")  //非字符串内空格-->过滤
+		Quit:($this.CharS'="""")&(..#JsonChars[$this.Char)	//非字符串内特殊符号{[:,]}-->退出
+		Continue:($this.CharS="""""")  //表示双引号之外异常内容处理
+		If $this.Char="""" {
+			If $this.CharS="" {
+				Set $this.CharS=$this.Char
+			} ElseIf $this.CharS="""" {
+				If ($e($this.SubStr,*)="\") {
+					//Set $this.SubStr=$this.SubStr_$this.Char
+					//判断是否是标准的转义字符"\\"，且本次节点值已循环完，引号标识应该置为完整""
+					if ($e($this.SubStr,*-1)'="\"){		
+						Set $this.SubStr=$this.SubStr_$this.Char	
+					}
+					Set $this.CharS=""""""		
+				} Else {
+					Set $this.CharS=""""""
+				}
+			}
+		} Else {
+			Set $this.SubStr=$this.SubStr_$this.Char
+		}
+	}
+	Quit //退出
+]]></Implementation>
+</Method>
+
+<Method name="getKey">
+<Description>
+获取json键值关键字</Description>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Quit ..evalStr($this.SubStr)
+]]></Implementation>
+</Method>
+
+<Method name="getVal">
+<Description>
+获取json键值结果</Description>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	If ($this.Char="{"){
+		Set val=..getJSONObject()
+		Do ..Next()
+	} ElseIf ($this.Char="["){
+		Set val=..getJSONArray()
+		Do ..Next()
+	} Else {
+		Set val=..evalStr($this.SubStr)
+	}
+	Quit val
+]]></Implementation>
+</Method>
+
+<Method name="getJSONObject">
+<Description>
+解析json对象</Description>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	Set jsonObj=##Class(%ArrayOfDataTypes).%New()
+	While '$this.AtEnd {
+		Do ..Next()
+		Set key="",val=""
+		Set key=..getKey()
+		If ($this.Char=":"){
+			Do ..Next()
+			Set val=..getVal()
+		}
+		//If (key'="")&(val'=""){
+		//空值也要有输出
+		If (key'=""){
+			Do jsonObj.SetAt(val,key)
+		}
+		Continue:$this.Char=","  //如果是,继续
+		Quit:$this.Char="}"  //如果是}结束
+		Quit //程序错误
+    }
+    Quit jsonObj
+]]></Implementation>
+</Method>
+
+<Method name="getJSONArray">
+<Description>
+解析josn数组</Description>
+<ReturnType>%ListOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	Set jsonArr=##Class(%ArrayOfDataTypes).%New()
+	While '$this.AtEnd {
+		Do ..Next()
+		Set val=..getVal()
+		If val'="" {
+			Do jsonArr.SetAt(val,jsonArr.Count()+1)
+		}
+		Continue:$this.Char=","  //如果是,继续
+		Quit:$this.Char="]"  //如果是}结束
+		Quit //程序错误
+	}
+	Quit jsonArr
+]]></Implementation>
+</Method>
+
+<Method name="Escape">
+<Description>
+给Json字符串转码 </Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>str:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	for tI=1:1:$LL(..#EscapeChar) { 
+		Set tCharPair=$LG(..#EscapeChar,tI)
+		Set str=$Replace(str,$LG(tCharPair,1),$LG(tCharPair,2))
+	}
+	Quit str
+]]></Implementation>
+</Method>
+
+<Method name="evalStr">
+<Description>
+对JSON数据字符特殊字符处理</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>instr:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Quit:(instr="") instr
+	//特殊字符处理
+	//Set instr = $ZCVT(instr,"I","JSON")
+	Set instr = ..Replace(instr, "\u0000", $c(0))
+	Set instr = ..Replace(instr, "\u0001", $c(1))
+	Set instr = ..Replace(instr, "\u0002", $c(2))
+	Set instr = ..Replace(instr, "\u0003", $c(3))
+	Set instr = ..Replace(instr, "\u0004", $c(4))
+	Set instr = ..Replace(instr, "\u0005", $c(5))
+	Set instr = ..Replace(instr, "\u0006", $c(6))
+	Set instr = ..Replace(instr, "\u0007", $c(7))
+	Set instr = ..Replace(instr, "\b", $c(8))       //Backspace
+	Set instr = ..Replace(instr, "\t", $c(9))       //Tab 空白
+	Set instr = ..Replace(instr, "\n", $c(10))      //换行
+	Set instr = ..Replace(instr, "\u000b", $c(11))
+	Set instr = ..Replace(instr, "\f", $c(12))      //换页 空白
+	Set instr = ..Replace(instr, "\r", $c(13))      //回车
+	Set instr = ..Replace(instr, "\u000e", $c(14))
+	Set instr = ..Replace(instr, "\u000f", $c(15))
+	Set instr = ..Replace(instr, "\u0010", $c(16))
+	Set instr = ..Replace(instr, "\u0011", $c(17))
+	Set instr = ..Replace(instr, "\u0012", $c(18))
+	Set instr = ..Replace(instr, "\u0013", $c(19))
+	Set instr = ..Replace(instr, "\u0014", $c(20))
+	Set instr = ..Replace(instr, "\u0015", $c(21))
+	Set instr = ..Replace(instr, "\u0016", $c(22))
+	Set instr = ..Replace(instr, "\u0017", $c(23))
+	Set instr = ..Replace(instr, "\u0018", $c(24))
+	Set instr = ..Replace(instr, "\u0019", $c(25))
+	Set instr = ..Replace(instr, "\u001a", $c(26))
+	Set instr = ..Replace(instr, "\u001b", $c(27))
+	Set instr = ..Replace(instr, "\u001c", $c(28))
+	Set instr = ..Replace(instr, "\u001d", $c(29))
+	Set instr = ..Replace(instr, "\u001e", $c(30))
+	Set instr = ..Replace(instr, "\u001f", $c(31))
+	Set instr = ..Replace(instr, "\\", "\")
+	Set instr = ..Replace(instr, "\""", "")		// """"  直接转为空
+	Quit instr
+]]></Implementation>
+</Method>
+
+<Method name="Replace">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>instr:%String,substr:%String,replacement:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q:(substr="") instr
+	q:'($l(instr,substr)>1) instr
+	
+	s mylen=$l(instr,substr)
+	for myIdx=1:1:mylen {
+		s myary(myIdx)=$p(instr,substr, myIdx)
+	}
+	s mystr=""
+	s myIdx=""
+	s myIdx=$o(myary(myIdx))
+	while (myIdx'=""){
+		s myrepstr=""
+		i ($o(myary(myIdx))=""){
+			s myrepstr=myary(myIdx)
+		}else{
+			s myrepstr=myary(myIdx)_replacement
+		}
+		i (mystr=""){
+			s mystr=myrepstr
+		}else{
+			s mystr=mystr_myrepstr
+		}
+		s myIdx=$o(myary(myIdx))
+		q:(myIdx="")
+	}
+	q mystr
+]]></Implementation>
+</Method>
+
+<Method name="GetStream">
+<Description>
+返回流串(Space:去除换行和空格,XMLFlag:是xml标识)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>StreamStr,Space="",XMLFlag=""</FormalSpec>
+<ReturnType>%Stream.GlobalCharacter</ReturnType>
+<Implementation><![CDATA[
+	s newStream = ##class(%Stream.GlobalCharacter).%New()
+	if $IsObject(StreamStr) {
+		do StreamStr.Rewind()
+		while 'StreamStr.AtEnd {
+			s RtnStr = StreamStr.Read(10000)
+			if (Space=1){
+				s RtnStr=$replace(RtnStr,$c(13,10),"")
+				s RtnStr=$replace(RtnStr," ","")
+			}
+			if (XMLFlag=1){
+				i RtnStr["?xml version=" s RtnStr=$zcvt(RtnStr,"O","UTF8")
+			}
+			d newStream.Write(RtnStr)
+		}
+	} else {
+		s RtnStr=StreamStr
+		if (Space=1){
+			s RtnStr=$replace(RtnStr,$c(13,10),"")
+			s RtnStr=$replace(RtnStr," ","")
+		}
+		if (XMLFlag=1){
+			i RtnStr["?xml version=" s RtnStr=$zcvt(RtnStr,"O","UTF8")
+		}
+		d newStream.Write(RtnStr)
+	}	
+	q newStream
+]]></Implementation>
+</Method>
+
+<Method name="XMLRoot">
+<Description>
+给数组的数据添加根节点</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ArrData:%ArrayOfDataTypes,Root:%String="",encoding="UTF-8"</FormalSpec>
+<ReturnType>%GlobalCharacterStream</ReturnType>
+<Implementation><![CDATA[
+	s Stream=##class(%GlobalCharacterStream).%New()
+	i (Root'=""){
+		s ArrayObj=##class(%ArrayOfDataTypes).%New()
+		d ArrayObj.SetAt(ArrData,Root)
+		s ArrData=ArrayObj
+	}
+	s xml=..Arr2XML(ArrData)
+	d Stream.Write("<?xml version=""1.0"" encoding="""_encoding_"""?>")
+	d Stream.CopyFrom(xml)
+	q Stream
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[/****************** 封装xml、JSON、数组生成和解析服务 **********************************/
+]]></Content>
+</UDLText>
+
+<Method name="Json2Arr">
+<Description>
+Json转为数组</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>json</FormalSpec>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	Set obj=##class(DHCDoc.Util.FromXML).%New()
+	If obj'="" Do obj.%Close()
+	Do obj.SetData(json)
+	Quit obj.GetData()
+]]></Implementation>
+</Method>
+
+<Method name="Arr2Json">
+<Description>
+数组转为Json流</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>data:%DataType</FormalSpec>
+<ReturnType>%GlobalCharacterStream</ReturnType>
+<Implementation><![CDATA[
+	s jsonStream = ##class(%Stream.GlobalCharacter).%New()
+	if $IsObject(data) {  
+		s key=""
+		s typeData=data.%ClassName()
+		i typeData="%ArrayOfDataTypes" {
+			s key=""
+			s count=0
+			d jsonStream.Write("{")
+			f {
+				s pData=data.GetNext(.key)
+				q:key=""
+				s value=..Arr2Json(pData)
+				s node=$S(count'=0:",",1:"")_""""_..Escape(key)_""":"
+				s count=count+1
+				d jsonStream.Write(node)
+				i $IsObject(value){
+					d jsonStream.CopyFrom(value)
+				}else{
+					d jsonStream.Write(value)
+				}
+			} 
+			d jsonStream.Write("}")
+			q jsonStream
+		}elseif typeData="%ListOfDataTypes" {
+			s cad=""
+			d jsonStream.Write("[")
+			f i=1:1:data.Count() {
+				s tmp=..Arr2Json(data.GetAt(i))
+				s symbol=$S(i>1:cad_",",1:"")
+				d jsonStream.Write(symbol)
+				i $IsObject(tmp){
+					d jsonStream.CopyFrom(tmp)	
+				}else{
+					d jsonStream.Write(tmp)
+				}
+			}
+			d jsonStream.Write("]")
+			q jsonStream
+		}elseif typeData="GlobalCharacter"{
+			d jsonStream.Write("""")
+			d jsonStream.CopyFrom(data)
+			d jsonStream.Write("""")
+			q jsonStream
+		}
+	}elseif ($FIND(data,".")) {
+		q:data="" """"""
+		q """"_..Escape(data)_""""
+	}elseif $ISVALIDNUM(data) {
+		q """"_..Escape(data)_""""
+	}else {
+		q:data="" """"""
+		q """"_..Escape(data)_""""
+	}
+	q jsonStream
+]]></Implementation>
+</Method>
+
+<Method name="Arr2XML">
+<Description>
+数组转为XML流</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>data:%ArrayOfDataTypes,node:%String=""</FormalSpec>
+<ReturnType>%GlobalCharacterStream</ReturnType>
+<Implementation><![CDATA[
+	if $IsObject(data) {  
+		set key=""
+		set typeData=data.%ClassName()
+		if typeData="%ArrayOfDataTypes" {
+			//type object
+			set key=""
+			set XMLStream=##class(%GlobalCharacterStream).%New()
+			set cad=""
+			for {
+				set pData=data.GetNext(.key)
+				quit:key=""
+				set value=..Arr2XML(pData,key)
+				if $IsObject(value){
+					do XMLStream.Write("<"_key_">")
+					do XMLStream.CopyFrom(value)
+					do XMLStream.Write("</"_key_">")
+				}else{
+					do XMLStream.Write("<"_key_">"_value_"</"_key_">")
+				}
+			} 
+			quit XMLStream
+		}elseif typeData="%ListOfDataTypes" {
+			//type array 
+			set XMLStream=##class(%GlobalCharacterStream).%New()
+			set cad=""
+			for Count=1:1:data.Count() {
+				set tmp=..Arr2XML(data.GetAt(Count),"")
+				if $IsObject(tmp){
+					if (node'="")&&(data.Count()>1) {
+						if Count=1 {
+							do XMLStream.CopyFrom(tmp)
+							do XMLStream.Write("</"_node_">")
+						}elseif(Count=data.Count()){
+							do XMLStream.Write("<"_node_">")
+							do XMLStream.CopyFrom(tmp)
+						}else{
+							do XMLStream.Write("<"_node_">")
+							do XMLStream.CopyFrom(tmp)
+							do XMLStream.Write("</"_node_">")
+						}
+					}else{
+						do XMLStream.CopyFrom(tmp)
+					}
+				}else{
+					do XMLStream.Write(tmp)
+				}
+			}
+			quit XMLStream
+    	}elseif typeData="GlobalCharacter" {
+	    	quit data
+    	}
+	}else {
+		quit data
+	}
+]]></Implementation>
+</Method>
+
+<Method name="XML2Arr">
+<Description>
+XML转为数组</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlStream,Root=""</FormalSpec>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	;如果是cache2010，则需要用Xml2JsonOld方法，且Root是根节点名称
+	s ExistDemic=##class(websys.Conversions).IsValidClassName("%Document.Object")
+	i ExistDemic=1 d
+	.s JsonStream=..Xml2Json(xmlStream)
+	e  d
+	.s JsonStream=..Xml2JsonOld(xmlStream,Root)
+	s Arr=..Json2Arr(JsonStream)
+	q Arr
+]]></Implementation>
+</Method>
+
+<Method name="Xml2Json">
+<Description>
+XML转Json流(Cache2016,支持包含xml头)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlStream</FormalSpec>
+<ReturnType>%GlobalCharacterStream</ReturnType>
+<Implementation><![CDATA[
+	s XMLStream=..GetStream(xmlStream,"",1)
+	s Obj=##class(%Document.Object).%New()
+	s XMLObj=Obj.XML(XMLStream) 	
+	d XMLObj.%ToJSONStream(.JsonStream)
+	s JsonStream=..GetStream(JsonStream, 1)
+	q JsonStream
+]]></Implementation>
+</Method>
+
+<Method name="Xml2JsonOld">
+<Description>
+XML转Json流(Cache2010,支持包含xml头))
+xmlStream：XML串或流、Root：根节点名称</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlStream,Root</FormalSpec>
+<ReturnType>%GlobalCharacterStream</ReturnType>
+<Implementation><![CDATA[
+	s XMLStream=..GetStream(xmlStream,"",1)
+	s JsonStream = ##class(%Stream.GlobalCharacter).%New()
+	s sc=##class(%XML.XPATH.Document).CreateFromStream(XMLStream,.tDocument)
+    i $$$ISERR(sc) {
+	    d JsonStream.Write("{}")
+		quit JsonStream
+	}else{
+		d JsonStream.Write("{")
+		s Key="/"_Root
+		s tSC=tDocument.EvaluateExpression(Key,".",.pResults)
+		i ($$$ISOK(tSC)&&(pResults.GetAt(1)'="")){
+			k MainNodeArr,LoopNodeArr
+		    s tResult=pResults.GetAt(1)
+	        i (tResult.Type=$$$XPATHDOM){  
+	        	;1、先读取主节点，便于过滤节点 
+	        	While tResult.Read(){  
+	        		s Type=tResult.NodeType
+	            	s Path=tResult.Path
+	            	s Name=tResult.Name  
+		            s Level=$l(Path,"\")-2
+		            i (Type'="element") continue
+	            	i (Name=Root) continue
+	            	s MainNodeStr=$p(Path,"\",1,Level)
+	            	i (MainNodeStr=Root) continue
+	            	s MainNode=$p(MainNodeStr,"\",Level)
+	            	s MainNodeArr(MainNode)=Level
+	        	}
+		        ;2、重新在读取一遍数据
+		        s (count,nodeSeq,valSeq,preLevel,arrSum)=0
+		        d tResult.Rewind()	
+	            While tResult.Read(){  
+	            	s nodeType=tResult.NodeType
+	            	s nodePath=tResult.Path
+	            	s nodeName=tResult.Name  
+	            	s nodeValue=tResult.Value
+		            s nodeLevel=$l(nodePath,"\")-2
+	            	i (nodeName=Root) continue
+	            	s MainNode=$p(nodePath,"\",nodeLevel)
+	            	;规则：当元素序号和元素值序号不匹配:可能上一个元素值为空、可能进入下一层循环、可能返回上一层循环
+	            	;如果是主节点，则过滤
+	            	i (nodeName'=Root)&&($d(MainNodeArr(nodeName))){
+		            	i (preLevel>nodeLevel){
+			            	;删除高层级循环的主节点
+			            	s node=""
+			            	f {
+				            	s node=$o(LoopNodeArr(node))
+				            	q:node=""
+				            	s Level=$g(LoopNodeArr(node))
+				            	i Level>nodeLevel k LoopNodeArr(node)
+				            }
+			            }
+		            	i ($d(LoopNodeArr(nodeName))){
+			            	;过滤主节点
+			            	i (valSeq'=nodeSeq) d JsonStream.Write("""""")	;上一个元素为空
+			            	d JsonStream.Write("},{")
+			            	s (nodeSeq,valSeq,count)=0		;当成根元素，重新计算
+			            	continue
+			            }else{
+				            ;记录循环到的主节点
+				        	s LoopNodeArr(nodeName)=nodeLevel
+				        }
+	            	}
+	            	i (nodeType="element") {
+				        i (valSeq'=nodeSeq){
+					    	;相连的两个元素,重置序号
+					    	s (nodeSeq,valSeq)=0
+					    	i (nodeLevel>preLevel) {
+						    	;下一层
+						    	d JsonStream.Write("[{")
+						    	s arrSum=arrSum+1
+					    	}elseif(nodeLevel=preLevel){
+						    	;同一层,且上一个元素没值
+						    	d JsonStream.Write(""""",")
+						    }else{
+								;返回上一层,且上一个元素没值
+								d JsonStream.Write("""""}],")
+								s arrSum=arrSum-1
+							}
+					    }elseif (count>0){
+				        	i (nodeLevel'=preLevel){
+				            	;不同层,结束列表
+				        		d JsonStream.Write("}]")
+				        		s arrSum=arrSum-1
+					    	}
+						    d JsonStream.Write(",")
+				        }	
+			            d JsonStream.Write(""""_nodeName_""":")
+			            ;元素序号
+		            	s nodeSeq=nodeSeq+1
+					}elseif(nodeType="chars"){
+						i $IsObject(nodeValue) { 
+							d JsonStream.CopyFrom(nodeValue)
+						}else{
+							;s nodeValue=$zcvt(nodeValue,"I","UTF8")
+							d JsonStream.Write(""""_nodeValue_"""")
+						}
+						;元素值序号
+						s valSeq=valSeq+1
+					}
+					;记录当前的层级，和下一个元素的层级比较	
+					s preLevel=nodeLevel					
+					s count=count+1	
+	            }
+	        	i (valSeq'=nodeSeq) {
+		        	;最后一个元素没有值
+		        	d JsonStream.Write("""""")
+		        }
+		        i arrSum>0{
+			    	;匹配输出}]
+			    	f i=1:1:arrSum{
+				    	d JsonStream.Write("}]")
+				    }
+			    }
+	        }
+		}
+		d JsonStream.Write("}")
+	}
+	q JsonStream
+]]></Implementation>
+</Method>
+
+<Method name="TestGet">
+<Description>
+得到测试数组
+w ##class(DHCDoc.Util.FromXML).TestGet()</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	s ArrayObj=##class(%ArrayOfDataTypes).%New()
+	d ArrayObj.SetAt(1,"a")
+	s ArrayObj1=##class(%ArrayOfDataTypes).%New()
+	d ArrayObj1.SetAt(2,"c")
+	d ArrayObj.SetAt(ArrayObj1,"b")
+	s JsonStr=..Arr2Json(ArrayObj)
+	w "数组转json："_JsonStr.Read(),!
+	s Arr=..Json2Arr(JsonStr)
+	
+	s Code="First",Desc="第一层"
+	s ArrayObj=##class(%ArrayOfDataTypes).%New()
+	d ArrayObj.SetAt(Code,"Code")
+	d ArrayObj.SetAt(Desc,"Desc_Text")
+	;s PhotoStream=##class(ext.util.String).Img2Base64("C:\Users\LX\Pictures\2.jpg") 
+	s PhotoStream=##class(%Stream.GlobalCharacter).%New()
+	d PhotoStream.Write("策划师")
+	d ArrayObj.SetAt(PhotoStream,"Photo")
+	s DataObj=##class(%ListOfDataTypes).%New()
+	f List=1:1:2 {
+		s CodeList="Second:"_List,DescList="第二层:"_List
+		s ArraySubObj=##class(%ArrayOfDataTypes).%New()
+		d ArraySubObj.SetAt(CodeList,"CodeS")
+		d ArraySubObj.SetAt(DescList,"DescS")
+		;三层节点
+		s SubObj=##class(%ListOfDataTypes).%New()
+		f Sub=1:1:5 {
+			s CodeSub="Third:"_Sub,DescSub="第三层:"_Sub
+			s SubArr=##class(%ArrayOfDataTypes).%New()
+			d SubArr.SetAt(CodeSub,"CodeT")
+			d SubArr.SetAt(DescSub,"DescT")
+			d SubObj.Insert(SubArr)
+		}
+		d ArraySubObj.SetAt(SubObj,"DataT")
+		d DataObj.Insert(ArraySubObj)
+	}
+	d ArrayObj.SetAt(DataObj,"DataS")
+	s XMLArr=##class(%ArrayOfDataTypes).%New()
+	d XMLArr.SetAt(ArrayObj,"Request")
+	q XMLArr
+]]></Implementation>
+</Method>
+
+<Method name="TestJsonXML">
+<Description>
+测试数组、XML、Json互转
+w ##class(DHCDoc.Util.FromXML).TestJsonXML()</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s ArrObj=..TestGet()
+	
+	w "数组转XML：" ,!
+	s XMLStr=..Arr2XML(ArrObj)	
+	w "		"_XMLStr.Read() ,!
+	
+	w "添加根节点和xml头：" ,!
+	s XMLStr=..XMLRoot(ArrObj)
+	w "  "_XMLStr.Read() ,!
+	
+	w "XML转数组：" ,!
+	s Arr=..XML2Arr(XMLStr,"Request") 
+	i $IsObject(Arr) { 
+		w "	  Code："_Arr.Data("Code") ,!
+		w "	  Desc_Text："_Arr.Data("Desc_Text") ,!
+		;如果有乱码，需转换处理一下
+		;w "	  Desc_Text："_$zcvt(Arr.Data("Desc_Text"),"I","UTF8") ,!
+		i Arr.IsDefined("Photo") d
+		.w "      Photo："_Arr.Data("Photo") ,!
+		w "	  DataSSum："_Arr.Data("DataS").Count() ,!
+		w "	  DataS.Code："_Arr.Data("DataS").GetAt(1).Data("CodeS") ,!
+	}else{
+		w "解析失败："_Arr
+		q ""
+	}
+
+	w "数组转Json：" ,!
+	s JsonStr=..Arr2Json(ArrObj)
+	w "		"_JsonStr.Read() ,!
+	
+	w "Json转数组：" ,!
+	s Arr=..Json2Arr(JsonStr)
+	s Arr=##class(DHCDoc.Util.FromXML).Json2Arr(JsonStr)
+
+	w "	Code："_Arr.Data("Request").Data("Code") ,!
+	w "	DataSSum："_Arr.Data("Request").Data("DataS").Count() ,!
+	w "	DataS.Code："_Arr.Data("Request").Data("DataS").GetAt(1).Data("CodeS") ,!	
+	
+	w "XML转Json1：",!
+	s JsonStr=..Xml2Json(XMLStr)
+	w "		"_JsonStr.Read() ,!
+	
+	;Xml2JsonOld可能不符合要求，需要重新再构建生成json
+	s XML="<Request><list><deptInfos><deptCode></deptCode><deptDesc></deptDesc><deptName></deptName><hosOrgCode></hosOrgCode><indexNo></indexNo><isDelete></isDelete><isRegister></isRegister><normdeptCode></normdeptCode><normdeptName></normdeptName></deptInfos><deptInfos><deptCode></deptCode><deptDesc></deptDesc><deptName></deptName><hosOrgCode></hosOrgCode><indexNo></indexNo><isDelete></isDelete><isRegister></isRegister><normdeptCode></normdeptCode><normdeptName></normdeptName></deptInfos><deptInfos><deptCode>12345</deptCode><deptDesc></deptDesc><deptName></deptName><hosOrgCode></hosOrgCode><indexNo></indexNo><isDelete></isDelete><isRegister></isRegister><normdeptCode></normdeptCode><normdeptName></normdeptName></deptInfos><deptInfos><deptCode></deptCode><deptDesc></deptDesc><deptName></deptName><hosOrgCode></hosOrgCode><indexNo></indexNo><isDelete></isDelete><isRegister></isRegister><normdeptCode></normdeptCode><normdeptName></normdeptName></deptInfos></list><messageHeader><accessAccount></accessAccount><sign></sign></messageHeader></Request>"
+	w "XML转Json转换前：",!
+	s JsonStr=..Xml2JsonOld(XML,"Request")
+	w "		"_JsonStr.Read() ,!
+	
+	s Arr=..Json2Arr(JsonStr)
+	s Arr1=##class(%ArrayOfDataTypes).%New()
+	d Arr1.SetAt(Arr.Data("list").Data("1").Data("deptInfos"),"list")
+	d Arr1.SetAt(Arr.Data("list").Data("1").Data("messageHeader").Data(1),"messageHeader")
+	s JsonNew=..Arr2Json(Arr1)
+	w "XML转Json转换后：",!
+	w "		"_JsonNew.Read() ,!
+
+	q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>
