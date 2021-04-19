@@ -1,0 +1,18 @@
+Caché
+
+1.输出页面内容
+    WRITE "输出的内容"
+    w "输出的内容"
+
+2.输出变量/对象 str 的值
+    ZWRITE str
+    zw str
+
+3.控制台调用 Custom.User.Index 类的 SendPost 方法
+    d ##class(Custom.User.Index).SendPost()
+
+4.输出变量/对象的错误消息
+    Set sc = httprequest.Post("https://test.com/api/test/get", 0)
+    if $$$ISERR(sc){ 
+        w $system.Status.GetErrorText(sc)
+    }
