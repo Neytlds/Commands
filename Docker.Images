@@ -1,0 +1,2 @@
+1. MySQL
+docker run --name MySQL-DEV -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypwd -d mysql:latest
