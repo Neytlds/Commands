@@ -17,3 +17,24 @@ Caché
     if $$$ISERR(sc){ 
         w $system.Status.GetErrorText(sc)
     }
+
+5.日期时间转换
+    w $ZDATEH("2021-5-29", 3)   // 65893
+    w $ZDATEH("2021-5-30", 3)   // 65894
+    w $ZDH("2021-06-01", 3)     // 65896
+
+    w $ZTIMEH("16:48:00")       // 60480
+
+6.SQL 语句中连续 OR 的语法
+    如：
+        SELECT * FROM TableName WHERE CollonName = 1 OR CollonName = 2 OR CollonName = 3
+    可以写成：
+        SELECT * FROM SQLUser.RB_ApptSchedule WHERE AS_RES_ParRef %INLIST $LISTFROMSTRING("123,abc,345,34td")
+
+7.SQL 语句中查询结果返回字符串列表，中间使用英文“,”分隔。如：“sdf,234,34tr,56uy”
+    SELECT LIST(CollonName) FROM TableName
+
+8.常用的 if 条件判断
+    a)判断列表中的元素是否为0
+        if ($LISTLENGTH(listName) = 0)
+        if (listName.Size = 0)
