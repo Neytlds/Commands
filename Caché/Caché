@@ -38,3 +38,40 @@ Caché
     a)判断列表中的元素是否为0
         if ($LISTLENGTH(listName) = 0)
         if (listName.Size = 0)
+
+9.讲对象转换为 JSON 字符串
+    a）实体类需要继承 %JSON.Adaptor 类
+    b）实体在实例化后使用 .%ToJSON() 方法
+    注：2018以上版本才支持此方式
+
+10.Global 在保存日期和时间格式后，输出什么：
+	#dim asDate As %Date
+	#dim asTime As %Time
+
+    s asDate = "2021-06-12"
+    s asTime = "06:18:35"
+    
+    s ^CacheTemp("DateTimeDemo") = asDate_"^"_asTime
+
+    w ^CacheTemp("DateTimeDemo"),!  // 2021-06-12^06:18:35
+    w asDate,!                      // 2021-06-12
+    w asDate + 1,!                  // 2022
+    w asTime,!                      // 06:18:35
+    w asTime + 1,!                  // 7
+	w "",!
+
+    s asDate = 65893
+    s asTime = 36406
+    s ^CacheTemp("DateTimeDemo") = asDate_"^"_asTime
+
+    w ^CacheTemp("DateTimeDemo"),!  // 65893^36406
+    w asDate,!                      // 65893
+    w asDate + 1,!                  // 65894
+    w asTime,!                      // 36406
+    w asTime + 1,!                  // 36407
+
+	k ^CacheTemp("DateTimeDemo")
+
+    由此可见，不论变量是什么类型，global只会将显式输入直接保存并输出。
+
+11.
