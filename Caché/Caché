@@ -33,6 +33,7 @@ Caché
 
 7.SQL 语句中查询结果返回字符串列表，中间使用英文“,”分隔。如：“sdf,234,34tr,56uy”
     SELECT LIST(CollonName) FROM TableName
+    (select $listtostring($listfromstring(list(admr_adminroute_dr->admr_desc)),'|')
 
 8.常用的 if 条件判断
     a)判断列表中的元素是否为0
