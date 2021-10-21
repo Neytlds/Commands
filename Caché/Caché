@@ -40,7 +40,7 @@ Caché
         if ($LISTLENGTH(listName) = 0)
         if (listName.Size = 0)
 
-9.讲对象转换为 JSON 字符串
+9.将对象转换为 JSON 字符串
     a）实体类需要继承 %JSON.Adaptor 类
     b）实体在实例化后使用 .%ToJSON() 方法
     注：2018以上版本才支持此方式
@@ -75,4 +75,114 @@ Caché
 
     由此可见，不论变量是什么类型，global只会将显式输入直接保存并输出。
 
-11.
+11.处理乱码问题
+    $ZCVT()
+
+12.生成 GUID 
+    w $system.Util.CreateGUID() // B813385C-2B09-11EC-B35C-0203D30FBD0D
+
+13.日期和时间相减
+    DATEDIFF
+
+14.如何判断一个字符串是否为 null 或 ""
+
+14.1.关于字符串类型是否为 null 的研究
+    ClassMethod StrIsNull(str As %String)
+    {
+        if ($data(str))
+        {
+            w "变量 str 不为 null，$data(str) = "_$data(str)_"，str = "_str
+        }
+        else
+        {
+            w "变量 str 为 null，$data(str) = "_$data(str)
+        }
+    }
+
+    运行上面的代码的结果为：
+        参数 str 的值       是否为空         $data(str) 的值     str 的值
+        null                null            0
+        ""                  not null        1                   ""
+        "  "                not null        1                   "  "
+        "abc"               not null        1                   "abc"
+
+14.2.关于字符串类型是否为 "" 的研究
+    ClassMethod StrIsEmpty(str As %String)
+    {
+        if (str = "")
+        {
+            w "变量 str 不为 empty，(str = '') = "_(str = "")_"，str = "_str
+        }
+        elseif (str = "  ")
+        {
+            w "变量 str 不为 empty，(str = '  ') = "_(str = "  ")_"，str = "_str
+        }
+        else
+        {
+            w "变量 str 不为 empty，(str = 'abc') = "_(str = "abc")_"，str = "_str
+        }
+    }
+
+    运行上面的代码的结果为：
+        参数 str 的值       是否为 ""           表达式的值               str 的值
+        null                报错：UNDEFINED
+        ""                  not empty           (str = '') = 1          ""
+        " "                 not empty           (str = 'abc') = 0       "abc"
+        "  "                not empty           (str = '  ') = 1        "  "
+        "abc"               not empty           (str = 'abc') = 1       "abc"
+        "def"               not empty           (str = 'abc') = 0       "def"
+
+14.3.关于 if 表达式的研究
+    ClassMethod StrIsTrue(str As %String)
+    {
+        if ('str)
+        {
+            w "('str) = "_('str)_"，str = "_str
+        }
+        if (str)
+        {
+            w "(str) = "_(str)_"，str = "_str
+        }
+    }
+
+    运行上面的代码的结果为：
+        参数 str 的值       表达式的值               str 的值
+        null                报错：UNDEFINED
+        1                   (str) = 1               1
+        "1"                 (str) = 1               "1"
+        0                   ('str) = 1              0
+        "0"                 ('str) = 1              "0"
+        ""                  ('str) = 1              ""
+        " "                 ('str) = 1              " "
+        "abc"               ('str) = 1              "abc"
+        true                报错：UNDEFINED
+        "true"              ('str) = 1              "true"
+        false               报错：UNDEFINED
+        "false"             ('str) = 1              "false"
+
+14.4.结论：
+    1）由 14.1 和 14.2 可知，Caché 中没有空字符串（即：""）的概念。空字符串和只包含空格的字符串都是有效的字符串，且值不同。
+    2）if 条件判断中，表达式的值为 1 或 "1" 时返回 true；表达式的值为 0 或 "0" 时返回 false。
+    3）判断字符串是否为 null 或 "" 的方法为：
+        ClassMethod IsNullOrEmpty(str As %String)
+        {
+            if ('$data(str))
+            {
+                w "str is null or empty."
+            }
+            else
+            {
+                if ($TRANSLATE(str," ","") = "")
+                {
+                    w "str is null or empty."
+                }
+                else
+                {
+                    w "str is not null or not empty."
+                }
+            }
+        }
+
+15.$Translate函数在字符串中执行逐个字符的替换，比如去掉字符串中的空格：
+    w $TRANSLATE("  sd f"," ","")   // "sdf"
+
