@@ -177,3 +177,49 @@ Git 常用命令
 	git config --gloabl alisa.br branch			将branch关键字设置为缩写br，调用命令“git branch”时可以简写为“git br”
 	git config --gloabl alisa.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 												将双引号里的内容设置为缩写lg，调用命令“git 双引号里的内容”时可以简写为“git lg”
+
+27.查看所有分支
+	git branch -a
+
+28.将已有的本地 Git 仓库推送到远程新的仓库
+	1、创建 github 私有仓库，在创建仓库的时候不要初始化 readme 文件
+	2、把现有仓库通过命令行上传
+		git remote add origin git@github.com:name/repo.git		添加远程索引
+		git push -u origin master								把本地 master 推送到远程
+	3、查看现有仓库的所有的远程代码库地址：
+		git remote -v
+							// origin  git@10.1.8.222:ihosp/web-api.git (fetch)
+							// origin  git@10.1.8.222:ihosp/web-api.git (push)
+
+	4、如果当前本地仓库已经设置了 origin 的地址，使用下列命令进行删除
+		git remote remove origin
+	   并再次使用 git remote -v 确定；
+	5、设置 origin 索引地址
+		git remote add origin git@github.com:name/repo.git
+	6、将本地 master 分支推送到远程仓库的 master 分支
+		git push -u origin master；
+	7、推送其他分支到远程仓库
+		git push --set-upstream origin 分支名称					在远程建立分支并推送本地分支；
+	8、推送 Git 子仓库到远程仓库，如果本地仓库体积过大，可以选择不推送，直接使用打包支持
+	9、项目转移完毕；
+		git push
+		git push origin 本地分支名称:远程分支名称
+	   使用一个，默认本地分支和远程分支相同
+
+29.拉取 Git 仓库中的所有分支到本地
+	1、git fetch --all
+    2、git pull --all
+
+30.推送 Git 仓库中的所有分支到远程仓库
+	1、git push REMOTE '*:*'
+    2、git push REMOTE --all
+    3、git push --all origin
+
+31.修改已经推送到远程代码库的 commit 信息
+	1、git log						-- 打开 log 记录
+	2、git commit --amend			-- 修改最新一次的 commit 内容
+	3、点击键盘上的“i”键后，修改 commit 内容
+	4、点击“esc”退出编辑
+	5、输入“:wq”，回车退出文档
+	6、git pull						-- 拉取代码
+	7、git push origin master		-- 推送代码到远程仓库

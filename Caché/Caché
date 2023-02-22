@@ -14,8 +14,8 @@ Caché
 
 4.输出变量/对象的错误消息
     Set sc = httprequest.Post("https://test.com/api/test/get", 0)
-    if $$$ISERR(sc){ 
-        w $system.Status.GetErrorText(sc)
+    if $$$ISERR(sc){ 
+        w $system.Status.GetErrorText(sc)
     }
 
 5.日期时间转换
@@ -24,6 +24,12 @@ Caché
     w $ZDH("2021-06-01", 3)     // 65896
 
     w $ZTIMEH("16:48:00")       // 60480
+
+    w $ZDate(65893, 3)          // 2021-5-29
+    w $ZTime(59160, 1)          // 16:26:00
+    w $ZTime(59160, 2)          // 16:26
+    w $ZTime(59160, 3)          // 04:26:00PM
+
 
 6.SQL 语句中连续 OR 的语法
     如：
@@ -186,3 +192,33 @@ Caché
 15.$Translate函数在字符串中执行逐个字符的替换，比如去掉字符串中的空格：
     w $TRANSLATE("  sd f"," ","")   // "sdf"
 
+16.当 WebService 参数类型为 %String 或未声明类型时，将空字符串（如：""）作为参数调用接口，Caché 会收到一个无法解析的字符（即：菱形问号），这时在程序中无法判断参数为 null 或 empty（使用本文档 14 节的方法也不行）。
+   解决方案：
+        在某些业务场景下（如非模糊查询时）可以考虑使用 $LENGTH(str) 或 $CHAR(str) 方法判断传入参数的长度，当长度为 1 时参数不参与查询。
+
+17.特殊符号
+    $C(10)  换行符
+    $C(13)  回车符
+
+18.字符串转 Base 64
+    w $SYSTEM.Encryption.Base64Encode("string", 0) // 每76个字符后插入CR/LF换行符(默认)
+    w $SYSTEM.Encryption.Base64Encode("string", 1) // 去掉换行
+    参考：http://10.1.71.191:57772/csp/documatic/%25CSP.Documatic.cls?APP=1&CLASSNAME=%25Library.TimeStamp&LIBRARY=%25SYS
+
+19.获取当前时间的通用时间戳
+    w $ZDATETIME($NOW(), -2) // 精确到“秒”
+    w $ZDATETIME($NOW(), -2)_"000" // 精确到“毫秒”
+    参考：http://10.1.71.191:57772/csp/docbook/DocBook.UI.Page.cls?KEY=RCOS_fzdatetime
+
+
+{"new_rowld":1365461,"new_mrn":"1718811","new_first_name":"yu","new_last_name":"shen","new_full_name":"","new_telephone":"18852951294","new_birthday":"1996-09-02","new_id_type":"Diplomat Certificate 外交官证","new_id_number":"\u0000"}
+
+小程序简介：本小程序为企业内部员工提供日常办公工具，仅企业内部员工可以登录。
+本次提交主要变化：关闭crm子模块的所有功能，仅保留HQ IT Request Collection的功能。
+企业全称：北京和睦家医院有限公司
+corpID：wxf0a4e6b7a98888b4
+
+
+
+
+生产批号、入库时间、药品有效期
